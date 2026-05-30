@@ -37,10 +37,11 @@ def network_id(subnetmask, ip):
     net_octets = [ip_octets[i] & mask_octets[i] for i in range(4)]
     return ".".join(map(str, net_octets)), net_octets
 
-def broadcast_adress(subnetmask, net_octets):
-    binary_subnetmask = [int(i) for i in subnetmask.split(".")]
-    inverted = [x ^ 255 for x in binary_subnetmask]
-    result = [str(net_octets[i] | inverted[i]) for i in range(4)]
+def wildcard_mask(binary_subnetmask):
+    return [x ^ 255 for x in binary_subnetmask]
+
+def broadcast_adress(net_octets, wildcard):
+    result = [str(net_octets[i] | wildcard[i]) for i in range(4)]
     return ".".join(result)
 
         
@@ -51,13 +52,16 @@ def main():
     subnetmask = subnet_mask(mask, ip)
     (networkid, net_octets) = network_id(subnetmask, ip)
     hosts = host_count(mask)
-    broadcastadress = broadcast_adress(subnetmask, net_octets)
+    wildcard = wildcard_mask([int(i) for i in subnetmask.split(".")])
+    broadcastadress = broadcast_adress(net_octets, wildcard)
+    
     print(f"""
           1. ip/mask - {ip}/{mask}
           2. subnetmask - {subnetmask}
           3. network id - {networkid}
           4. broadcast adress - {broadcastadress}
           5. hosts count - {hosts}
+          6. wildcard - {".".join(str(x) for x in wildcard)}
           """)
 
     
